@@ -8,6 +8,14 @@
     <artifactId>algorithm-primary</artifactId>
     <version>1.0-SNAPSHOT</version>
     <description>算法基础</description>
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13.2</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>

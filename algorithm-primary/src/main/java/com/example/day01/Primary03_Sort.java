@@ -1,4 +1,4 @@
-package com.example;
+package com.example.day01;
 
 /**
  * @Date: 2022/9/6 19:33
