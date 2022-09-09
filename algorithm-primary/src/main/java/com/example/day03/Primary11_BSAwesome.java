@@ -2,7 +2,7 @@ package com.example.day03;
 
 /**
  * @Date: 2022/9/8 19:37
- * <p>
+ *
  * 二分法，局部最小值问题（找一个局部最小即可）  条件：arr数组整体无序， 相邻的数不相等
  */
 public class Primary11_BSAwesome {
