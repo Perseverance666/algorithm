@@ -148,7 +148,7 @@
     }
 ```
 
-3.局部最小值问题，找一个局部最小即可
+3、局部最小值问题，找一个局部最小即可
 
 1.先判断第0个数，或者第N-1个数是否是局部最小
 
@@ -186,6 +186,103 @@
         }
         //此时L = R,这个数一定是局部最小
         return L;
+    }
+```
+
+### 2、class02
+
+#### 1）异或运算
+
+1、如何不用额外变量交换两个数
+
+```java
+    public static void swap (int[] arr, int i, int j) {
+        arr[i]  = arr[i] ^ arr[j];
+        arr[j]  = arr[i] ^ arr[j];
+        arr[i]  = arr[i] ^ arr[j];
+    }
+```
+
+2、一个数组中有一种数出现了奇数次，其他数都出现了偶数次，怎么找到并打印这种数
+
+定义一个变量eor初值为0，将所有数进行异或运算，出现偶数次的其他数经过异或运算变成0，最终只剩出现奇数次的那个数，即为所求
+
+```java
+public static void printOddTimesNum1(int[] arr) {
+    int eor = 0;
+    for (int i = 0; i < arr.length; i++) {
+        eor ^= arr[i];
+    }
+    System.out.println(eor);
+}
+```
+
+3.一个数组中有两种数出现了奇数次，其他数都出现了偶数次，怎么找到并打印这种数
+
+1.定义一个变量eor初值为0，将所有数进行异或运算，出现偶数次的其他数经过异或运算变成0，最后eor = a ^ b
+
+2.我们知道a != b，故eor二进制状态下一定存在1，只有a与b的某一位不同，eor才等于1，我们取eor最右边的1这位进行研究，此时a和b的这一位一定是一个1一个0
+
+3.将原来的所有数分成两组，一组是那一位是1的，另外一组是那一位是0的，这样就将a和b分成了两组，各自再带几个出现偶数次的数
+
+4.然后再定义一个变量eor2，规定只对那一位是1的进行异或，这样经过异或运算最终假如就得到a了，然后b = eor ^ a =  a ^ b
+
+```java
+public static void printOddTimesNum2(int[] arr) {
+    int eor = 0;
+    for(int i = 0; i < arr.length; i++){
+        eor ^= arr[i];
+    }
+    System.out.println(eor);  //eor = a ^ b;
+
+    //取eor最右边的1最为条件，然后分成两组
+    int rightOne = eor & (-eor);   //eor & (~eor + 1)    等同于  eor & (-eor) ，可以得到最右边的1，例如：0001000
+    int eor2 = 0;
+    for(int i = 0; i < arr.length; i++){
+        //这次只异或那一位是1的
+        if((arr[i] & rightOne) == rightOne){
+            eor2 ^= arr[i];
+        }
+
+    }
+
+    int a = eor2; //eor2的异或结果就是其中一个数
+    int b = eor ^ a;   //b = eor ^ a = a ^ b ^ a;
+    System.out.println(a + " " + b);
+
+}
+```
+
+4、数组中所有的数都出现了M次，只有一种数出现了K次，1 <= K < M 返回这种数
+
+1.先创建一个32位的数组，开始存的全是0
+
+2.然后依次检查原数组中的每个数，每个数的哪一位上有1((arr[i] >> j) & 1) != 0)，就在32位数组上的对应位置加1，最后完成32位数组
+
+3.检查32位数组，若某一位模M 等于 0，说明出现K次的那个数在这一位上是0，若模M不等于0，说明出现K次的那个数在这一位上是1，把这一位的1加到结果上去 ans = ans | (1 << i)。最终找到这个数
+
+```java
+  public static int km(int[] arr, int k, int m) {
+        int[] t = new int[32];
+        for (int i = 0; i < arr.length; i++) {
+            for (int j = 0; j < 32; j++) {
+                if(((arr[i] >> j) & 1) != 0){
+                    //说明从右向左数，第j位是1，加到32位数组中
+                    t[j]++;
+                }
+
+            }
+        }
+
+        int ans = 0;
+        for(int i = 0; i < 32; i++){
+            if(t[i] % m != 0){
+                //说明出现k次的那个数，从右往左，二进制在第i位上是1
+                ans = ans | (1 << i);
+            }
+        }
+
+        return ans;
     }
 ```
 
