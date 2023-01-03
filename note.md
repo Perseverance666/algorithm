@@ -85,15 +85,17 @@
 
 #### 4）二分法
 
-1、在一个有序数组中，找某个数是否存在
+##### 1、题目一
+
+题目在一个有序数组中，找某个数是否存在
 
 1.先找中间的数，若当前数 = 指定数，找到了
 
 2.若当前数 < 指定数，说明所求可能在右边，将L移到mid右边
 
-2.若当前数 > 指定数，说明所求可能在左边，将R移到mid左边
+3.若当前数 > 指定数，说明所求可能在左边，将R移到mid左边
 
-3.当L> R时，就全找完了，没有找到，返回false
+4.当L> R时，就全找完了，没有找到，返回false
 
 ```java
     public static boolean exist(int[] sortedArr, int num) {
@@ -118,7 +120,9 @@
     }
 ```
 
-2、在一个有序数组中，找到 >= 某个数最左侧的位置 (<= 最右侧位置 问题类似)
+##### 2、题目二
+
+题目：在一个有序数组中，找到 >= 某个数最左侧的位置 (<= 最右侧位置 问题类似)
 
 1.先找中间的数，若当前数 >= 指定数，说明左面有可能还有符合要求的数，记录当前位置，并将R移到mid左边
 
@@ -148,7 +152,9 @@
     }
 ```
 
-3、局部最小值问题，找一个局部最小即可
+##### 3、题目三
+
+题目：局部最小值问题，找一个局部最小即可
 
 1.先判断第0个数，或者第N-1个数是否是局部最小
 
@@ -193,7 +199,7 @@
 
 #### 1）异或运算
 
-1、如何不用额外变量交换两个数
+技巧：如何不用额外变量交换两个数
 
 ```java
     public static void swap (int[] arr, int i, int j) {
@@ -203,7 +209,9 @@
     }
 ```
 
-2、一个数组中有一种数出现了奇数次，其他数都出现了偶数次，怎么找到并打印这种数
+##### 1、题目一
+
+题目：一个数组中有一种数出现了奇数次，其他数都出现了偶数次，怎么找到并打印这种数
 
 定义一个变量eor初值为0，将所有数进行异或运算，出现偶数次的其他数经过异或运算变成0，最终只剩出现奇数次的那个数，即为所求
 
@@ -217,7 +225,9 @@ public static void printOddTimesNum1(int[] arr) {
 }
 ```
 
-3.一个数组中有两种数出现了奇数次，其他数都出现了偶数次，怎么找到并打印这种数
+##### 2、题目二
+
+题目：一个数组中有两种数出现了奇数次，其他数都出现了偶数次，怎么找到并打印这种数
 
 1.定义一个变量eor初值为0，将所有数进行异或运算，出现偶数次的其他数经过异或运算变成0，最后eor = a ^ b
 
@@ -253,7 +263,9 @@ public static void printOddTimesNum2(int[] arr) {
 }
 ```
 
-4、数组中所有的数都出现了M次，只有一种数出现了K次，1 <= K < M 返回这种数
+##### 3、题目三
+
+题目：数组中所有的数都出现了M次，只有一种数出现了K次，1 <= K < M 返回这种数
 
 1.先创建一个32位的数组，开始存的全是0
 
@@ -286,3 +298,253 @@ public static void printOddTimesNum2(int[] arr) {
     }
 ```
 
+### 3、class03
+
+#### 1）链表反转
+
+##### 1、单链表反转
+
+1.准备两个指针pre和next都先指向null，他俩用来记录位置，先让next记录当前节点的下一结点
+
+2.然后反转指针
+
+3.然后pre指向Head记录当前节点位置，即下一个节点的上一个节点
+
+4.最后更新Head，此时第一个节点完成，依次完成之后的节点
+
+```java
+    public static Node reverseLinkedList(Node head) {
+        Node pre = null;
+        Node next = null;
+        while(head != null){
+            next = head.next;
+            head.next = pre;
+            pre = head;
+            head = next;
+        }
+        return pre;
+    }
+```
+
+##### 2、双链表反转
+
+双链表和单链表过程一样，只是反转链表时，要反转next和last两个
+
+```java
+    public static DoubleNode reverseDoubleList(DoubleNode head) {
+        DoubleNode pre = null;
+        DoubleNode next = null;
+        while(head != null){
+            next = head.next;
+            head.next = pre;
+            head.last = next;
+            pre = head;
+            head = next;
+        }
+        return pre;
+    }
+```
+
+#### 2）移除链表元素
+
+1.首先让head指向第一个不需要删除的节点，用来返回
+
+2.然后创建两个指针pre，cur先指向head（cur用来指向当前节点，pre用来指向下一个节点）
+
+3.判断该节点值是否与指定值相等。若相等，让pre跳过这个节点，pre不动，pre.next指向下一个节点，然后cur后移。确保cur指向下一个节点，pre指向当前节点
+
+4.若不等，pre指向cur指向的节点（因为cur和pre有可能指向同一个位置，也有可能一前一后)，目的是让pre指向cur指向的位置，然后cur后移。确保cur指向下一个节点，pre指向当前节点
+
+
+
+```java
+    public static Node removeValue(Node head, int num) {
+        //1、首先让head指向第一个不需要删除的节点
+        while(head != null){
+            if(head.value != num){
+                break;
+            }
+            head = head.next;
+        }
+        //2、然后进行删除
+        Node pre = head;
+        Node cur = head;
+        while (cur != null){
+            if(cur.value == num){
+                pre.next = cur.next;
+            }else{
+                pre = cur;
+            }
+            cur = cur.next;
+        }
+        return head;
+    }
+
+```
+
+#### 3）返回栈中最小元素
+
+1.首先定义两个栈，一个存数据，另一个存最小值
+
+2.若当前元素比当前最小值小，当前元素入两个栈
+
+3.若当前元素大于当前最小值，当前元素入数据栈，另一个栈再存一次之前的最小值，保证两个栈有相同的层次
+
+```java
+ public static class MyStack2 {
+        private Stack<Integer> stackData;
+        private Stack<Integer> stackMin;
+
+        public MyStack2() {
+            this.stackData = new Stack<Integer>();
+            this.stackMin = new Stack<Integer>();
+        }
+
+        public void push(int newNum) {
+            if (this.stackMin.isEmpty()) {
+                this.stackMin.push(newNum);
+            } else if (newNum < this.getmin()) {
+                this.stackMin.push(newNum);
+            } else {
+                int newMin = this.stackMin.peek();
+                this.stackMin.push(newMin);
+            }
+            this.stackData.push(newNum);
+        }
+
+        public int pop() {
+            if (this.stackData.isEmpty()) {
+                throw new RuntimeException("Your stack is empty.");
+            }
+            this.stackMin.pop();
+            return this.stackData.pop();
+        }
+
+        public int getmin() {
+            if (this.stackMin.isEmpty()) {
+                throw new RuntimeException("Your stack is empty.");
+            }
+            return this.stackMin.peek();
+        }
+    }
+```
+
+#### 4）用栈实现队列
+
+1.准备两个栈，push栈用来加数据，pop栈用来弹出数据
+
+2.首先将push栈中的所有数据全都弹出到pop栈中，这样pop栈弹出就实现队列了
+
+3.若在pop栈弹出的过程中，push栈又加入了新的元素。必须等pop栈都弹出完了，才能将push栈的元素弹出到pop栈中
+
+4.模拟添加，先加入push栈，等pop栈为空时，再全部添加到pop栈
+
+5.模拟弹出，等pop栈为空时，再全部添加到pop栈，然后弹出pop栈，模拟完成
+
+```java
+    public static class TwoStacksQueue {
+        public Stack<Integer> stackPush;
+        public Stack<Integer> stackPop;
+
+        public TwoStacksQueue() {
+            stackPush = new Stack<Integer>();
+            stackPop = new Stack<Integer>();
+        }
+
+        // push栈向pop栈倒入数据
+        private void pushToPop() {
+            //只有pop栈为空时，才将push栈的所有元素弹出到pop栈中
+            if (stackPop.empty()) {
+                while (!stackPush.empty()) {
+                    //一次将push栈中的所有元素都弹出到pop栈中
+                    stackPop.push(stackPush.pop());
+                }
+            }
+        }
+
+        public void add(int pushInt) {
+            stackPush.push(pushInt);
+            pushToPop();
+        }
+
+        public int poll() {
+            if (stackPop.empty() && stackPush.empty()) {
+                throw new RuntimeException("Queue is empty!");
+            }
+            pushToPop();
+            return stackPop.pop();
+        }
+
+        public int peek() {
+            if (stackPop.empty() && stackPush.empty()) {
+                throw new RuntimeException("Queue is empty!");
+            }
+            pushToPop();
+            return stackPop.peek();
+        }
+    }
+```
+
+#### 5）用队列实现栈
+
+1.首先准备两个队列，一个queue最终用来弹出的，另一个help用来暂时存放其他元素的
+
+2.模拟添加，直接往queue队列中加入元素即可
+
+3.模拟弹出，先将queue队列的元素弹出到help队列中，让queue只剩一个元素，这样弹出queue中的元素就实现了栈。
+
+4.queue队列弹出完这一个元素后，将help队列改成queue队列，将queue队列改成help队列
+
+```java
+    public static class TwoQueueStack<T> {
+        public Queue<T> queue;
+        public Queue<T> help;
+
+        public TwoQueueStack() {
+            queue = new LinkedList<>();
+            help = new LinkedList<>();
+        }
+
+        public void push(T value) {
+            queue.offer(value);
+        }
+
+        public T poll() {
+            while (queue.size() > 1) {
+                help.offer(queue.poll());
+            }
+            T ans = queue.poll();
+            Queue<T> tmp = queue;
+            queue = help;
+            help = tmp;
+            return ans;
+        }
+
+        public T peek() {
+            while (queue.size() > 1) {
+                help.offer(queue.poll());
+            }
+            T ans = queue.poll();
+            help.offer(ans);
+            Queue<T> tmp = queue;
+            queue = help;
+            help = tmp;
+            return ans;
+        }
+
+        public boolean isEmpty() {
+            return queue.isEmpty();
+        }
+
+    }
+```
+
+#### 6）Master公式
+
+形如T(N)=a*T(N/b) + O(N^d) (其中的a、b、d都是常数)的递归函数并且子规模一致的条件下，可以直接通过Master公式来确定时间复杂度
+
+1.如果log(b,a) < d，复杂度为O(N ^ d)
+
+2.如果log(b,a) > d，复杂度为O(N ^ log(b,a))
+
+3.如果log(b,a) = d，复杂度为O(N ^ d * log(2,N))
