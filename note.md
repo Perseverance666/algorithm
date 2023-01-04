@@ -4,13 +4,13 @@
 
 ### 1、class01
 
-#### 1）选择排序
+#### 1）选择排序，复杂度O(N^2)
 
 1.先从a[0] - a[N-1] 个数中找到最小的数把它放在a[0]的位置
 
 2.在从a[1] - a[N-1]个数中找到最小的数把它放在a[1]的位置上，以此类推
 
-3.一次循环找到一个最小值，放在开头，然后每次循环找一个最小值往之前找到的最小值后面放，复杂度为O(N^2)
+3.一次循环找到一个最小值，放在开头，然后每次循环找一个最小值往之前找到的最小值后面放
 
 ```java
     public static void SelectionSort(int[] arr) {
@@ -32,13 +32,13 @@
     }
 ```
 
-#### 2）冒泡排序
+#### 2）冒泡排序，复杂度O(N^2)
 
 1.先从a[0] - a[N-1]个数中，从头开始两两比较，将较大的数放到后面，这样最后一个数就是最大的
 
 2.再从a[0] - a[N-2]个数中，像上面步骤一样两两比较，这样倒数第二个数就是第二大的，以此类推
 
-3.一次循环两两比较，最终将找到一个最大值放在最后，然后每次循环再找剩下数中的最大值，复杂度为O(N^2)
+3.一次循环两两比较，最终将找到一个最大值放在最后，然后每次循环再找剩下数中的最大值
 
 ```java
     public static void BubbleSort(int[] arr) {
@@ -58,13 +58,13 @@
     }
 ```
 
-#### 3）插入排序
+#### 3）插入排序，复杂度O(N^2)
 
 1.先确保0 - 1 位置上的数有序，若a[1] 小于a[0]，交换，反之不变
 
 2.在确保0 - 2 位置上的数有序，若a[2] 小于a[1]，交换，直到比前面的数大，或者前面没数了，以此类推
 
-3.这样确保第i个数前面的数都是有序的，然后将该数插入到合适位置，复杂度为O(N^2)
+3.这样确保第i个数前面的数都是有序的，然后将该数插入到合适位置
 
 ```java
     public static void insertionSort(int[] arr) {
@@ -548,3 +548,284 @@ public static void printOddTimesNum2(int[] arr) {
 2.如果log(b,a) > d，复杂度为O(N ^ log(b,a))
 
 3.如果log(b,a) = d，复杂度为O(N ^ d * log(2,N))
+
+### 4、class04
+
+#### 1）归并排序，复杂度O(N*logN)
+
+##### 1、递归实现
+
+1.定义一个函数process(int[] arr, int L, int R)，把L到R上变有序
+
+2.然后分成两部分把L到M变有序，再把M+1到R变有序，然后再把它们两个merge
+
+3.merge(int[] arr, int L, int M, int R)，准备一个数组help用来存最后排序好的数据。准备两个变量p1和p2首先分别指向L和M+1，然后经过挑选完成最终排序
+
+```java
+    // 递归方法实现
+    public static void mergeSort1(int[] arr) {
+        if (arr == null || arr.length < 2) {
+            return;
+        }
+        process(arr, 0, arr.length - 1);
+    }
+
+    // 把arr[L..R]排有序
+    public static void process(int[] arr, int L, int R) {
+        if (L == R) { // base case
+            return;
+        }
+        int mid = L + ((R - L) >> 1);
+        process(arr, L, mid);
+        process(arr, mid + 1, R);
+        merge(arr, L, mid, R);
+    }
+
+    //将L到M 和 M+1到R上的数据进行归并排序
+    public static void merge(int[] arr, int L, int M, int R) {
+        int[] help = new int[R - L + 1];
+        int i = 0;
+        int p1 = L;
+        int p2 = M + 1;
+        while (p1 <= M && p2 <= R) {
+            help[i++] = arr[p1] <= arr[p2] ? arr[p1++] : arr[p2++];
+        }
+        // 要么p1越界了，要么p2越界了
+        while (p1 <= M) {
+            help[i++] = arr[p1++];
+        }
+        while (p2 <= R) {
+            help[i++] = arr[p2++];
+        }
+        //将help数组数据存回arr
+        for (i = 0; i < help.length; i++) {
+            arr[L + i] = help[i];
+        }
+
+    }
+```
+
+##### 2、非递归实现
+
+1.首先步长设置为1，然后进入循环判断此时步长是否超出数组长度，若超出了证明排序完成
+
+2.先从左边第一个数，即L=0开始，然后再进入循环判断此时L是否超出数组长度，若超出证明越界了。循环结束后还要检测一下，看看此时步长是否 > 2分之数组长度，防止溢出（因为有可能由于精度问题导致越界，结果变成负数，这样就又进入第一个循环了，所以要检测一下）。若没有越界，则将步长乘2
+
+3.在第二个循环中，若此时剩下的元素数量(N-L) <= 步长，就结束当前循环。否则确定M位置和R位置，其中要是确定的R位置已经越界了就改成N-1
+
+4.然后合并merge(int[] arr, int L, int M, int R)，修改L的位置，L = R + 1
+
+```java
+    // 非递归方法实现
+    public static void mergeSort2(int[] arr) {
+        if (arr == null || arr.length < 2) {
+            return;
+        }
+        int N = arr.length;
+        // 步长
+        int mergeSize = 1;
+        while (mergeSize < N) { //步长小于数组长度才继续
+            // 当前左组的，第一个位置
+            int L = 0;
+            while (L < N) {		//L越界就结束循环
+                if (mergeSize >= N - L) {	//剩下的元素 <= 步长就结束循环
+                    break;
+                }
+                int M = L + mergeSize - 1;
+                int R = M + Math.min(mergeSize, N - 1 - M);
+                merge(arr, L, M, R);
+                L = R + 1;
+            }
+            // 防止溢出
+            if (mergeSize > N / 2) {
+                break;
+            }
+            mergeSize <<= 1;
+        }
+    }
+```
+
+#### 2）返回数组的最小和，归并排序
+
+将数组中每个元素左边比它小的**值**全部累加起来。左值小于右值才返回
+
+1.定义一个函数process(int[] arr, int L, int R)，把0到N-1上变有序，并返回最小和
+
+2.先返回L到M上的最小和，再返回M+1到R上的最小和，最后merge两部分再求最小和，把这三部分最小和加起来
+
+3.merge将元素放到help数组时，如果左侧指定值 < 右侧指定值，左侧指针移动，最小和 += 左值 *( 右值和剩余数的个数)。边计算最小和边merge
+
+4.如果左值 > 右值，只将较小数放到help，右侧指针移动，最小和不加，继续比较接下来的
+
+5.如果左值 = 右值，将右值放入help，右侧指针移动，最小和不加。(要确保左右值不等时，能知道右侧有多少个比左值大的，所以要右侧指针移动)
+
+```java
+ public static int smallSum(int[] arr) {
+        if (arr == null || arr.length < 2) {
+            return 0;
+        }
+        return process(arr, 0, arr.length - 1);
+    }
+
+    // arr[L..R]既要排好序，也要求小和返回
+    // 所有merge时，产生的小和，累加
+    public static int process(int[] arr, int l, int r) {
+        if (l == r) {
+            return 0;
+        }
+        // l < r
+        int mid = l + ((r - l) >> 1);
+        return process(arr, l, mid) + process(arr, mid + 1, r) + merge(arr, l, mid, r);
+    }
+
+    public static int merge(int[] arr, int L, int m, int r) {
+        int[] help = new int[r - L + 1];
+        int i = 0;
+        int p1 = L;
+        int p2 = m + 1;
+        int res = 0;
+        while (p1 <= m && p2 <= r) {
+            res += arr[p1] < arr[p2] ? (r - p2 + 1) * arr[p1] : 0;
+            help[i++] = arr[p1] < arr[p2] ? arr[p1++] : arr[p2++];
+        }
+        while (p1 <= m) {
+            help[i++] = arr[p1++];
+        }
+        while (p2 <= r) {
+            help[i++] = arr[p2++];
+        }
+        for (i = 0; i < help.length; i++) {
+            arr[L + i] = help[i];
+        }
+        return res;
+    }
+```
+
+#### 3）返回逆序对数量，归并排序
+
+将数组中每个元素右边比它大的数的**个数**全部累加起来。左值大于右值才返回
+
+1.定义一个函数process(int[] arr, int L, int R)，把0到N-1上变有序，并返回逆序对数量
+
+2.先返回L到M上的逆序对数量，再返回M+1到R上的逆序对数量，最后merge两部分再求逆序对数量，把这三部分逆序对数量加起来
+
+3.这次的merge指针从右往左，merge将元素放到help数组时，如果左侧指定值 > 右侧指定值，右侧指针左移，逆序对数量 += 右值左边数的个数。边计算逆序对数量边merge
+
+4.如果左值 < 右值，只将较小数放到help，左侧指针左移，逆序对数量不加，继续比较接下来的
+
+5.如果左值 = 右值，将右值放入help，右侧指针左移，逆序对数量不加。(要确保左右值不等时，能知道右侧有多少个比左值小的，所以要右侧指针移动)
+
+```java
+public static int reversePairNumber(int[] arr) {
+        if (arr == null || arr.length < 2) {
+            return 0;
+        }
+        return process(arr, 0, arr.length - 1);
+    }
+
+    // arr[L..R]既要排好序，也要求逆序对数量返回
+    // 所有merge时，产生的逆序对数量，累加，返回
+    public static int process(int[] arr, int l, int r) {
+        if (l == r) {
+            return 0;
+        }
+        // l < r
+        int mid = l + ((r - l) >> 1);
+        return process(arr, l, mid) + process(arr, mid + 1, r) + merge(arr, l, mid, r);
+    }
+
+    //这次指针从右边开始移动
+    public static int merge(int[] arr, int L, int m, int r) {
+        int[] help = new int[r - L + 1];
+        int i = help.length - 1;
+        int p1 = m;
+        int p2 = r;
+        int res = 0;
+        while (p1 >= L && p2 > m) {
+            res += arr[p1] > arr[p2] ? (p2 - m) : 0;
+            help[i--] = arr[p1] > arr[p2] ? arr[p1--] : arr[p2--];
+        }
+        while (p1 >= L) {
+            help[i--] = arr[p1--];
+        }
+        while (p2 > m) {
+            help[i--] = arr[p2--];
+        }
+        for (i = 0; i < help.length; i++) {
+            arr[L + i] = help[i];
+        }
+        return res;
+    }
+```
+
+#### 4）翻转对，归并排序
+
+给定一个数组 nums ，如果 i < j 且 nums[i] > 2*nums[j] 我们就将 (i, j) 称作一个重要翻转对。返回给定数组中的重要翻转对的数量
+
+1.定义一个函数process(int[] arr, int L, int R)，把0到N-1上变有序，并返回翻转对数量
+
+2.先返回L到M上的翻转对数量，再返回M+1到R上的翻转对数量，最后merge两部分再求翻转对数量，把这三部分翻转对数量加起来
+
+3.这次的先求翻转对数量，再进行merge。利用for循环指向左侧的变量，再定义一个变量指向右侧的变量，初始值为m+1，如果左值 > 2 * 右值，右侧指针右移，直到不满足停下，翻转对数量 += 右侧指针 - (M+1)。先计算翻转数量再merge
+
+4.然后左侧指针移动，以此类推。最后merge
+
+```java
+ public static int reversePairs(int[] nums) {
+        if(nums == null || nums.length <= 1){
+            return 0;
+        }
+        return process(nums,0,nums.length - 1);
+    }
+
+    public static int process(int[] arr,int L,int R){
+        //边界条件
+        if(L == R){
+            return 0;
+        }
+        int M = (L + R) / 2;
+        //先计算左侧数量，再计算右侧数量，然后计算merge数量，最后三者加起来
+        return process(arr,L,M) + process(arr,M+1,R) + merge(arr,L,M,R);
+    }
+
+    
+    public static int merge (int[] arr,int L,int M,int R){
+        int ans = 0;
+        int windowR = M + 1;  //用来追踪右侧
+        //用一个for循环来追踪左侧
+        for(int i = L;i <= M; i++){
+            //1、先计算翻转对
+            while(windowR <= R && (long)arr[i] > (long)2 * arr[windowR]){
+                windowR++;
+            }
+            ans += windowR - (M + 1);
+        }
+
+        //2、再进行merge
+        int[] help = new int[R - L + 1];
+        int p1 = L;
+        int p2 = M + 1;
+        int i = 0;
+        while(p1 <= M && p2 <= R){
+            help[i++] = arr[p1] <= arr[p2] ? arr[p1++] : arr[p2++];
+        }
+        //一侧都排完了
+        while(p1 <= M){
+            help[i++] = arr[p1++];
+        }
+        while(p2 <= R){
+            help[i++] = arr[p2++];
+        }
+        //将排好序的help数组拷贝到arr中
+        for(i = 0;i < help.length; i++){
+            arr[L + i] = help[i];
+        }
+
+        return ans;
+    }
+```
+
+### 5、class05
+
+#### 1）
+
