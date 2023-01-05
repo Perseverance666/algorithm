@@ -760,7 +760,7 @@ public static int reversePairNumber(int[] arr) {
 
 #### 4）翻转对，归并排序
 
-给定一个数组 nums ，如果 i < j 且 nums[i] > 2*nums[j] 我们就将 (i, j) 称作一个重要翻转对。返回给定数组中的重要翻转对的数量
+题目：给定一个数组 nums ，如果 i < j 且 nums[i] > 2*nums[j] 我们就将 (i, j) 称作一个重要翻转对。返回给定数组中的重要翻转对的数量
 
 1.定义一个函数process(int[] arr, int L, int R)，把0到N-1上变有序，并返回翻转对数量
 
@@ -827,5 +827,194 @@ public static int reversePairNumber(int[] arr) {
 
 ### 5、class05
 
-#### 1）
+#### 1）区间和的个数，归并排序，难
+
+题目：给你一个整数数组 nums 以及两个整数 lower 和 upper 。求数组中，值位于范围 [lower, upper] （包含 lower 和 upper）之内的区间和的个数 。区间和 S(i, j) 表示在 nums 中，位置从 i 到 j 的元素之和，包含 i 和 j (i ≤ j)。
+
+1.该问题要转换成 利用前缀数组来求区间和的个数
+
+2.定义一个函数process(long[] sum, int L, int R, int lower, int upper)，返回0 ~ N-1上满足条件的区间和数量
+
+3.边界条件L==R，即求L这个位置上的区间和数量，若这个数满足[lower,upper]，说明对于原数组0~L这是一个区间和，区间和数+1。若不满足，区间和数+0，继续接下的操作
+
+4.先求L到M上的区间和数，再求M+1到R上的区间和数，然后求merge后的区间和数，最后加起来
+
+5.这次先求区间和数，再进行merge。目标就是求右侧每个元素的区间和个数的总和。两个变量追踪左侧，min =  右数 - upper ,max = 右数 - lower，若左数在[min,max]之间，则(左数,右数)这个区间和就满足条件，利用两个变量追踪 求所有满足条件的左数
+
+6.然后再merge
+
+```java
+    public int countRangeSum(int[] nums, int lower, int upper) {
+        if(nums == null || nums.length == 0){
+            return 0;
+        }
+        //转换为利用前缀数组求区间和个数
+        long[] sum = new long[nums.length];
+        sum[0] = nums[0];
+        for(int i = 1; i < nums.length;i++){
+            sum[i] = sum[i - 1] + nums[i];
+        }
+        //返回前缀数组0 ~ N-1上的区间和个数
+        return process(sum,0,sum.length - 1,lower,upper);
+    }
+     
+    public static int process(long[] sum,int L,int R,int lower,int upper){
+        if(L == R){
+            //若L这个数满足，即对于原数组(0,L)这个区间和满足条件，区间和+1，否则+0
+            return sum[L] >= lower && sum[L] <= upper ? 1 : 0;
+        }
+        int M = (L + R) / 2;
+        //先求左侧区间和数，再求右侧区间和数，然后求merge后的区间和数，最后加起来
+        return process(sum,L,M,lower,upper) + process(sum,M+1,R,lower,upper) + merge(sum,L,M,R,lower,upper);
+
+    }
+
+    public static int merge(long[] sum,int L,int M,int R,int lower,int upper){
+        //1、先计算区间和数
+        int ans = 0;   //区间和数
+        //定义两个变量追踪左侧，用来判断右侧的每个数的区间和数
+        int windowL = L;
+        int windowR = L;
+        //定义一个循环来，追踪右侧每个数  [windowL, windowR)
+        for(int i = M + 1; i <= R; i++){
+            long min = sum[i] - upper;
+            long max = sum[i] - lower;
+            //若左数在[min,max]之间，则(左数,右数)这个区间和就满足条件
+            while (windowR <= M && sum[windowR] <= max) {
+                windowR++;
+            }
+            while (windowL <= M && sum[windowL] < min) {
+                windowL++;
+            }
+            //此时windowL ~ windowR是满足条件的，即(windowL,右数) 一直到 (windowR,右数)这些区间和都是满足条件的
+            ans += windowR - windowL;
+        }
+        //2、再merge
+        long[] help = new long[R-L+1];
+        int p1 = L;
+        int p2 = M + 1;
+        int i = 0;
+        while(p1 <= M && p2 <= R){
+            help[i++] = sum[p1] <= sum[p2] ? sum[p1++] : sum[p2++];
+        }
+        while(p1 <= M){
+            help[i++] = sum[p1++];
+        }
+        while(p2 <= R){
+            help[i++] = sum[p2++];
+        }
+        for(i = 0; i < help.length; i++){
+            sum[L+i] = help[i];
+        }
+
+        return ans;
+    }
+```
+
+#### 2）荷兰国旗问题的划分
+
+题目：将小于最后的数arr[R]，等于arr[R]和大于arr[R]的数分成三个区域，排好后 返回等于arr[R]的区间
+
+1.设置小于区域 less = L -1和 大于区域more = R，大于区域先把arr[R]囊括起来，最后再来处理
+
+2.定义个变量用来追踪当前数，如果当前数 = arr[R]，追踪下一个数
+
+3.如果当前数 < arr[R] ，当前数与小于区域右边的那一数互换，然后区域向右移，追踪下一个数
+
+4.如果当前数 > arr[R] ，当前数与大于区域左边的那一数互换，然后区域向左移，不追踪下一个数
+
+5.最后将arr[R]与 大于区域 第一个数互换。最终返回的区间是 (小于区域 + 1,大于区域)，因为大于区域的第一个数是之前的最后的那个arr[R]
+
+```java
+    // arr[L...R] 玩荷兰国旗问题的划分，以arr[R]做划分值
+    // <arr[R] ==arr[R] > arr[R]
+    //返回最终排好的 等于arr[R]的那些数的坐标区间(都在中间位置)
+    public static int[] netherlandsFlag(int[] arr, int L, int R) {
+        if (L > R) { // L...R L>R
+            return new int[] { -1, -1 };
+        }
+        if (L == R) {
+            return new int[] { L, R };
+        }
+        int less = L - 1; // < 区 右边界
+        int more = R; // > 区 左边界
+        int index = L;
+        while (index < more) { // 当前位置，不能和 >区的左边界撞上
+            //如果当前数 = arr[R]，追踪下一个数
+            if (arr[index] == arr[R]) {
+                index++;
+            } else if (arr[index] < arr[R]) {
+                //如果当前数 < arr[R] ，当前数与区域前一个数互换，然后区域向后移，追踪下一个数
+				swap(arr, less + 1, index);
+				less++;
+				index++;
+            } else {
+                //如果当前数 > arr[R] ，当前数与区域前一个数互换，然后区域向左移，不追踪下一个数
+                swap(arr, index, more - 1);
+                more--;
+            }
+        }
+        //最后将arr[R]与 大于区域 第一个数互换
+        swap(arr, more, R); // <[R]   =[R]   >[R]
+        //返回的区间是 (小于区域 + 1,大于区域)，因为大于区域的第一个数是之前的最后的那个arr[R]
+        return new int[] { less + 1, more };
+    }
+```
+
+#### 3）随机快速排序，复杂度O(N*logN)
+
+普通快速排序最差情况复杂度O(N^2)
+
+1.调用方法process3(int[] arr, int L, int R)，将0~N-1 上的元素进行随机快速排序
+
+2.边界条件L >= R返回上一层
+
+3.先将最后一个数与前面随机一个数进行互换 变成随机快速排序
+
+4.然后通过netherlandsFlag方法 将以arr[R]进行分割3部分，然后返回 囊括所有的arr[R] 的区间
+
+5.最后递归调用process方法，先完成(L，区间左值 -1)上的随机快速排序，再完成(区间右值+1，R)上的随机快速排序
+
+```java
+	// 荷兰国旗问题
+	public static int[] netherlandsFlag(int[] arr, int L, int R) {
+		if (L > R) {
+			return new int[] { -1, -1 };
+		}
+		if (L == R) {
+			return new int[] { L, R };
+		}
+		int less = L - 1;
+		int more = R;
+		int index = L;
+		while (index < more) {
+			if (arr[index] == arr[R]) {
+				index++;
+			} else if (arr[index] < arr[R]) {
+				swap(arr, index++, ++less);
+			} else {
+				swap(arr, index, --more);
+			}
+		}
+		swap(arr, more, R);
+		return new int[] { less + 1, more };
+	}
+   
+	public static void quickSort3(int[] arr) {
+        if (arr == null || arr.length < 2) {
+            return;
+        }
+        process3(arr, 0, arr.length - 1);
+    }
+
+    public static void process3(int[] arr, int L, int R) {
+        if (L >= R) {
+            return;
+        }
+        swap(arr, L + (int) (Math.random() * (R - L + 1)), R);
+        int[] equalArea = netherlandsFlag(arr, L, R);
+        process3(arr, L, equalArea[0] - 1);
+        process3(arr, equalArea[1] + 1, R);
+    }
+```
 
