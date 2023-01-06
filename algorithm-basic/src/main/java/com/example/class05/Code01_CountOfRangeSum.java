@@ -34,6 +34,7 @@ public class Code01_CountOfRangeSum {
         int windowL = L;
         int windowR = L;
         // [windowL, windowR)
+        //for循环追踪右侧
         for (int i = M + 1; i <= R; i++) {
             long min = arr[i] - upper;
             long max = arr[i] - lower;

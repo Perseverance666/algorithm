@@ -2,7 +2,7 @@ package com.example.class05;
 
 /**
  * @Date: 2023/1/5 20:41
- * 快速排序
+ * 快速排序 递归
  */
 public class Code02_PartitionAndQuickSort {
     public static void swap(int[] arr, int i, int j) {
@@ -114,9 +114,13 @@ public class Code02_PartitionAndQuickSort {
         if (L >= R) {
             return;
         }
+        //先将最后一个数与前面随机一个数进行互换 变成随机快速排序
         swap(arr, L + (int) (Math.random() * (R - L + 1)), R);
+        //分割3部分，将分割好的 等于arr[R]的那些数的 以数组形式返回，即(equalArea[0],equalArea[1])上的数是arr[R]
         int[] equalArea = netherlandsFlag(arr, L, R);
+        //排序左部分
         process3(arr, L, equalArea[0] - 1);
+        //排序右部分
         process3(arr, equalArea[1] + 1, R);
     }
 

@@ -31,9 +31,11 @@ public class Code04_BiggerThanRightTwice {
         int windowR = m + 1;
         for (int i = L; i <= m; i++) {
             while (windowR <= r && (long) arr[i] > (long) arr[windowR] * 2) {
+                //一直到不满足 左值 > 2*右值 停下来
                 windowR++;
             }
-            ans += windowR - m - 1;
+            //这样 windowR - (m + 1) 这些数都是满足条件
+            ans += windowR - (m + 1);
         }
         //2、再进行merge
         int[] help = new int[r - L + 1];

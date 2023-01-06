@@ -35,6 +35,7 @@ public class Code03_ReversePair {
         int p2 = r;
         int res = 0;
         while (p1 >= L && p2 > m) {
+            //若左值大于右值，说明左值和 右值及右值左边的所有数 都可构成逆序对，左指针向左移动检验下一个左值
             res += arr[p1] > arr[p2] ? (p2 - m) : 0;
             help[i--] = arr[p1] > arr[p2] ? arr[p1--] : arr[p2--];
         }

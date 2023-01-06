@@ -653,7 +653,7 @@ public static void printOddTimesNum2(int[] arr) {
 
 2.先返回L到M上的最小和，再返回M+1到R上的最小和，最后merge两部分再求最小和，把这三部分最小和加起来
 
-3.merge将元素放到help数组时，如果左侧指定值 < 右侧指定值，左侧指针移动，最小和 += 左值 *( 右值和剩余数的个数)。边计算最小和边merge
+3.merge将元素放到help数组时，如果左侧指定值 < 右侧指定值，说明左值是 右值以及右边剩下数 的最小和中的一个值，左值在 右值以及右边剩下数 的所有最小和中，占据的总值为：左值 * （右侧剩下数的个数）。左侧指针移动，边计算最小和边merge
 
 4.如果左值 > 右值，只将较小数放到help，右侧指针移动，最小和不加，继续比较接下来的
 
@@ -703,15 +703,15 @@ public static void printOddTimesNum2(int[] arr) {
 
 #### 3）返回逆序对数量，归并排序
 
-将数组中每个元素右边比它大的数的**个数**全部累加起来。左值大于右值才返回
+将数组中每个元素右边比它小的数的**个数**全部累加起来。左值大于右值才返回
 
 1.定义一个函数process(int[] arr, int L, int R)，把0到N-1上变有序，并返回逆序对数量
 
 2.先返回L到M上的逆序对数量，再返回M+1到R上的逆序对数量，最后merge两部分再求逆序对数量，把这三部分逆序对数量加起来
 
-3.这次的merge指针从右往左，merge将元素放到help数组时，如果左侧指定值 > 右侧指定值，右侧指针左移，逆序对数量 += 右值左边数的个数。边计算逆序对数量边merge
+3.这次的merge指针从右往左，merge将元素放到help数组时，若左值 > 右值，说明左值和 右值及右值左边的所有数 都可构成逆序对，左指针向左移动检验下一个左值。边计算逆序对数量边merge
 
-4.如果左值 < 右值，只将较小数放到help，左侧指针左移，逆序对数量不加，继续比较接下来的
+4.如果左值 < 右值，只将较小数放到help，右侧指针左移，逆序对数量不加，继续比较接下来的
 
 5.如果左值 = 右值，将右值放入help，右侧指针左移，逆序对数量不加。(要确保左右值不等时，能知道右侧有多少个比左值小的，所以要右侧指针移动)
 
@@ -1016,5 +1016,139 @@ public static int reversePairNumber(int[] arr) {
         process3(arr, L, equalArea[0] - 1);
         process3(arr, equalArea[1] + 1, R);
     }
+```
+
+### 6、class06
+
+#### 1）堆
+
+堆本质是一棵完全二叉树，完全二叉树只要有右孩子就必须有左孩子，它包括大根堆和小根堆，大根堆是每个子树的根节点都比孩子节点要大，这样第一个根节点数就是最大的
+
+堆的相关操作：
+
+```java
+// 新加进来的数，现在停在了index位置，若它爹小于它，依次往上移动，
+//向上调整
+private void heapInsert(int[] arr, int index) {
+    // [index] [index-1]/2
+    // index == 0
+    while (arr[index] > arr[(index - 1) / 2]) {
+        //若新加的数大于它爹，与它爹交换位置，再去比较它与它的新爹谁大，循环下去，直到它爹>=它
+        swap(arr, index, (index - 1) / 2);
+        index = (index - 1) / 2;
+    }
+}
+
+// 背景：将第一个元素与最后一个元素互换后，heapSize--，逻辑删除最大元素。
+// 检验此时第一个数 下面它大是否比孩子大。若它比下面的孩子小。从index位置，它不断的下沉
+// 直到 左右孩子中较大的孩子都不再比index位置的数大 或者 已经没孩子了，结束
+//向下调整
+private void heapify(int[] arr, int index, int heapSize) {
+    int left = index * 2 + 1;
+    while (left < heapSize) { // 如果有左孩子，有没有右孩子，可能有可能没有！
+        //1、先取左右孩子中较大的。如果有右孩子并且右孩子大于左孩子选右孩子。如果没有右孩子或者左孩子大于右孩子选左孩子
+        int largest = left + 1 < heapSize && arr[left + 1] > arr[left] ? left + 1 : left;
+        //2、然后将孩子与它爹比较。 把爹和孩子中较大的下标，给largest。
+        largest = arr[largest] > arr[index] ? largest : index;
+        if (largest == index) {
+            //3、若它爹就是较大的，不用交换，结束循环
+            break;
+        }
+        //4、若孩子大于爹，交换位置，把大的放上面。然后继续检查它的孩子是否比它大，循环下去
+        swap(arr, largest, index);
+        index = largest;
+        left = index * 2 + 1;
+    }
+}
+```
+
+#### 2）堆排序，复杂度O(N*logN)
+
+```java
+public static void heapSort(int[] arr) {
+    if(arr == null || arr.length <= 1){
+        return;
+    }
+
+    int heapSize = arr.length;      //满足大根堆的这些数的数量
+    //1、先把数组从0开始依次heapInsert
+    for(int i = 0; i < heapSize; i++){
+        heapInsert(arr,i);
+    }
+    //2、然后把第一个元素也就是最大的元素与最后一个元素交换，同时heapSize有效值减一，逻辑删除最大值，最大值排好序了
+    swap(arr,0,heapSize - 1);
+    heapSize--;
+
+    while(heapSize > 0){
+        //3、对新换上来的根节点向下heapify
+        heapify(arr,0,heapSize);
+        //4、heapify后又变成大根堆，再把第一个元素和最后一个元素交换，这样又一个第二大的排好序了，直到heapSize变为0
+        swap(arr,0,heapSize - 1);
+        heapSize--;
+    }
+}
+
+// arr[index]刚来的数，往上移动
+public static void heapInsert(int[] arr, int index) {
+    while (arr[index] > arr[(index - 1) / 2]) {
+        swap(arr, index, (index - 1) / 2);
+        index = (index - 1) / 2;
+    }
+}
+
+// arr[index]位置的数，能否往下移动
+public static void heapify(int[] arr, int index, int heapSize) {
+    int left = index * 2 + 1; // 左孩子的下标
+    while (left < heapSize) { // 下方还有孩子的时候
+        // 两个孩子中，谁的值大，把下标给largest
+        // 1）只有左孩子，left -> largest
+        // 2) 同时有左孩子和右孩子，右孩子的值<= 左孩子的值，left -> largest
+        // 3) 同时有左孩子和右孩子并且右孩子的值> 左孩子的值， right -> largest
+        int largest = left + 1 < heapSize && arr[left + 1] > arr[left] ? left + 1 : left;
+        // 父和较大的孩子之间，谁的值大，把下标给largest
+        largest = arr[largest] > arr[index] ? largest : index;
+        if (largest == index) {
+            break;
+        }
+        swap(arr, largest, index);
+        index = largest;
+        left = index * 2 + 1;
+    }
+}
+```
+
+#### 3）部分有序数组变有序
+
+给定一个数组，部分有序，意思就是现在数组元素的位置 距离 排好顺序后的位置 不超过k个单位
+
+思想：最小的数一定在(0,k)上，因为若在k+1或者以后，最小数移动k位就无法到0的位置上了。第二小的一定在(1,k+1)，以此类推。这样 堆加一个，弹一个，因为是小根堆，弹出来的都是当前堆中最小的
+
+```java
+public static void sortedArrDistanceLessK(int[] arr, int k) {
+    //若k=0 说明已经排好序了
+    if (k == 0) {
+        return;
+    }
+    // 默认小根堆
+    PriorityQueue<Integer> heap = new PriorityQueue<>();
+    int index = 0;  //放入堆中的元素下标
+    // 最小的数一定在(0,k)上，因为若在k+1或者以后，最小数移动k位就无法到0的位置上了
+    //1、先把(0,k-1)上的数放入小根堆里
+    for (; index <= Math.min(arr.length - 1, k - 1); index++) {
+        heap.add(arr[index]);
+    }
+
+    //2、再把k上的数到堆里，然后弹出堆的第一个元素就是最小值，放进新数组。然后依次往后，堆加一个，弹一个
+    int i = 0;	//排好序数组的下标
+    for (; index < arr.length; i++, index++) {
+
+        heap.add(arr[index]);
+        arr[i] = heap.poll();
+    }
+    //3、等到元素都已经加过堆里面了，就把堆剩余的元素都弹出来，就是排好序的
+    while (!heap.isEmpty()) {
+        arr[i++] = heap.poll();
+    }
+}
 ```
 
