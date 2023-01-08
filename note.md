@@ -1194,7 +1194,133 @@ public static int maxCover3(int[][] m) {
 }
 ```
 
-#### 2）手动改写堆题目
+#### 2）加强堆
+
+```java
+//T一定要是非基础类型，有基础类型需求 包一层
+public class HeapGreater<T> {
+
+	private ArrayList<T> heap;				//堆
+	private HashMap<T, Integer> indexMap;	//反向索引表
+	private int heapSize;					//数组中表示堆的有效长度
+	private Comparator<? super T> comp;		//比较器
+
+	public HeapGreater(Comparator<? super T> c) {
+		heap = new ArrayList<>();
+		indexMap = new HashMap<>();
+		heapSize = 0;
+		comp = c;
+	}
+
+	public boolean isEmpty() {
+		return heapSize == 0;
+	}
+
+	public int size() {
+		return heapSize;
+	}
+
+	public boolean contains(T obj) {
+		return indexMap.containsKey(obj);
+	}
+
+	public T peek() {
+		return heap.get(0);
+	}
+
+	public void push(T obj) {
+		//1、堆和反向索引表都要添加该元素
+		heap.add(obj);
+		indexMap.put(obj, heapSize);
+		//2、将该元素向上heapInsert，继续变成堆
+		heapInsert(heapSize++);
+	}
+
+	public T pop() {
+		//1、获取要弹出的元素
+		T ans = heap.get(0);
+		//2、将要弹出的元素和最后一个元素交换
+		swap(0, heapSize - 1);
+		//3、反向索引表和堆 都要删除 交换后的最后一个元素(就是要弹出的元素)
+		indexMap.remove(ans);
+		heap.remove(--heapSize);
+		//4、新换上来的元素，向下进行heapify，继续变成堆
+		heapify(0);
+		return ans;
+	}
+
+	//删除元素：就是把要删除的元素和最后一个元素互换 然后删除
+	//经过该方法删除完某个元素后，仍满足堆
+	public void remove(T obj) {
+		//1、获取最后一个元素
+		T replace = heap.get(heapSize - 1);
+		//2、获取要删除元素的索引
+		int index = indexMap.get(obj);
+		//3、反向索引表删除该元素 堆逻辑删除数组最后一个位置
+		indexMap.remove(obj);
+		heap.remove(--heapSize);
+		//如果要删除的元素不是最后一个元素
+		if (obj != replace) {
+			//4、将删除的元素的位置替换成原来最后一个元素 并更新原来最后一个元素的反向索引表
+			heap.set(index, replace);
+			indexMap.put(replace, index);
+			//5、对原来最后一个元素进行调整，使其仍满足堆
+			resign(replace);
+		}
+	}
+
+	//对元素obj进行调整，使其仍满足堆
+	public void resign(T obj) {
+		//两个只会执行一个
+		heapInsert(indexMap.get(obj));
+		heapify(indexMap.get(obj));
+	}
+
+	// 请返回堆上的所有元素
+	public List<T> getAllElements() {
+		List<T> ans = new ArrayList<>();
+		for (T c : heap) {
+			ans.add(c);
+		}
+		return ans;
+	}
+
+	private void heapInsert(int index) {
+		while (comp.compare(heap.get(index), heap.get((index - 1) / 2)) < 0) {
+			swap(index, (index - 1) / 2);
+			index = (index - 1) / 2;
+		}
+	}
+
+	private void heapify(int index) {
+		int left = index * 2 + 1;
+		while (left < heapSize) {
+			int best = left + 1 < heapSize && comp.compare(heap.get(left + 1), heap.get(left)) < 0 ? (left + 1) : left;
+			best = comp.compare(heap.get(best), heap.get(index)) < 0 ? best : index;
+			if (best == index) {
+				break;
+			}
+			swap(best, index);
+			index = best;
+			left = index * 2 + 1;
+		}
+	}
+
+	private void swap(int i, int j) {
+		T o1 = heap.get(i);
+		T o2 = heap.get(j);
+		heap.set(i, o2);
+		heap.set(j, o1);
+		indexMap.put(o2, i);
+		indexMap.put(o1, j);
+	}
+
+}
+```
+
+
+
+#### 3）手动改写堆题目，了解
 
 题目：给定一个整型数组，int[] arr；和一个布尔类型数组，boolean[] op两个数组一定等长，假设长度为N，arr[i]表示客户编号，op[i]表示客户操作，arr = [3,3,1,1,2,5...]，op=[T,T,T,F,T,F...]。一对arr[i]和op[i]就代表一个事件：用户号为arr[i]，op[i]=T就代表这个用户购买了一件商品，op[i]=F就代表这个用户退货了一件商品。现在你作为电商平台负责人，你想在每一个事件到来的时候，都给购买次数最多的前K名用户颁奖。所以每个事件发生后，你都需要一个得奖名单(得奖区)。
 
@@ -1373,4 +1499,173 @@ public static List<List<Integer>> topK(int[] arr, boolean[] op, int k) {
 
 ### 8、class08
 
-#### 1）
+#### 1）前缀树
+
+```java
+ class Trie {
+        //前缀树节点类型
+        class Node {
+            public int pass;    //有几个字符经过该节点
+            public int end;      //有几个字符串以该结点结束
+            public Node[] nexts;  //以数组下标为路的下一个节点。  数组下标0代表a  1代表b ...
+
+            public Node() {
+                pass = 0;
+                end = 0;
+                nexts = new Node[26];
+            }
+        }
+
+        //头结点
+        private Node root;
+
+        public Trie() {
+            root = new Node();
+        }
+
+        //往前缀树中加入字符串
+        public void insert(String word) {
+            if (word == null) {
+                return;
+            }
+            //字符串拆成字符
+            char[] str = word.toCharArray();
+            Node node = root;       //node先指向根节点
+            node.pass++;
+            int path = 0;
+            for (int i = 0; i < str.length; i++) { // 从左往右遍历字符
+                path = str[i] - 'a'; // 由字符，对应成走向哪条路      a走0号路，b走1号路...
+                //如果当前节点后面没有 这个字符的路
+                if (node.nexts[path] == null) {
+                    node.nexts[path] = new Node();
+                }
+                //node指向新的结点
+                node = node.nexts[path];
+                node.pass++;
+            }
+            node.end++;
+        }
+
+        //删除前缀树中的word
+        public void erase(String word) {
+            if (countWordsEqualTo(word) != 0) {
+                char[] chs = word.toCharArray();
+                Node node = root;
+                node.pass--;
+                int path = 0;
+                for (int i = 0; i < chs.length; i++) {
+                    path = chs[i] - 'a';
+                    if (--node.nexts[path].pass == 0) {
+                        node.nexts[path] = null;
+                        return;
+                    }
+                    node = node.nexts[path];
+                }
+                node.end--;
+            }
+        }
+
+        //word这个单词出现了几次
+        public int countWordsEqualTo(String word) {
+            if (word == null) {
+                return 0;
+            }
+            char[] chs = word.toCharArray();
+            Node node = root;
+            int index = 0;
+            for (int i = 0; i < chs.length; i++) {
+                index = chs[i] - 'a';
+                if (node.nexts[index] == null) {
+                    //如果没路了，就是出现0次
+                    return 0;
+                }
+                node = node.nexts[index];
+            }
+            return node.end;
+        }
+
+        //pre前缀出现了几次
+        public int countWordsStartingWith(String pre) {
+            if (pre == null) {
+                return 0;
+            }
+            char[] chs = pre.toCharArray();
+            Node node = root;
+            int index = 0;
+            for (int i = 0; i < chs.length; i++) {
+                index = chs[i] - 'a';
+                if (node.nexts[index] == null) {
+                    return 0;
+                }
+                node = node.nexts[index];
+            }
+            return node.pass;
+        }
+    }
+```
+
+#### 2）计数排序
+
+```java
+public static void countSort(int[] arr) {
+    if (arr == null || arr.length < 2) {
+        return;
+    }
+    int max = Integer.MIN_VALUE;
+    for (int i = 0; i < arr.length; i++) {
+        //1、先找到数组中的最大值，作为新数组的数组大小，因为新数组的下标代表原数组的值
+        max = Math.max(max, arr[i]);
+    }
+    int[] bucket = new int[max + 1];
+    for (int i = 0; i < arr.length; i++) {
+        //2、创建一个新的数组，下标代表存的数值，新数组值代表 值为下标的这个数在原数组中的个数
+        //新数组中间会有好多空着的
+        bucket[arr[i]]++;
+    }
+    int i = 0;
+    //3、然后把新数组依次遍历，就是排好序的了
+    for (int j = 0; j < bucket.length; j++) {
+        //遍历完所有 以这个下标为值的这个数
+        while (bucket[j]-- > 0) {
+            arr[i++] = j;
+        }
+    }
+}
+```
+
+#### 3）基数排序
+
+```java
+// 基数排序, 十进制的最大位数digit
+public static void radixSort(int[] arr, int digit) {
+    final int radix = 10;
+    int i = 0, j = 0;
+    // 有多少个数准备多少个辅助空间
+    int[] help = new int[arr.length];
+    for (int d = 1; d <= digit; d++) { // 有多少位就进出几次。  1->个位  2->十位...
+        //现在count[i]表示d位数字=i的一共有多少个
+        int[] count = new int[radix]; // 规定count数组大小是10，10个空间，
+        for (i = 0; i < arr.length; i++) {
+            //1、获取数组元素第d位上的数，添加到count数组。现在count[i]表示d位数字=i的一共有多少个
+            j = getDigit(arr[i], d);
+            count[j]++;
+        }
+        for (i = 1; i < radix; i++) {
+            //2、现在count[i]表示d位数字<=i的一共有多少个，后面就这样用
+            count[i] = count[i] + count[i - 1];
+        }
+        for (i = arr.length - 1; i >= 0; i--) {
+            //3、从右往左遍历获取d位上的数，count[j]表示d位<=j的个数，所以新数组0~count[j]-1上放的都是d位<=j的数，将它放在最右边就是count[j]-1上，核心就是从右往左放
+            //只减count数组j下标的数量即可，>j下标的数量不用减，不耽误后面计算
+            j = getDigit(arr[i], d);
+            help[count[j] - 1] = arr[i];
+            count[j]--;
+        }
+        for (i = 0; i < arr.length; i++) {
+            //将d位排好序的数组更新到arr中。省了10个桶
+            arr[i] = help[i];
+        }
+    }
+}
+```
+
