@@ -1070,12 +1070,18 @@ public static void heapSort(int[] arr) {
         return;
     }
 
-    int heapSize = arr.length;      //满足大根堆的这些数的数量
-    //1、先把数组从0开始依次heapInsert
-    for(int i = 0; i < heapSize; i++){
-        heapInsert(arr,i);
+    // //1.1、先把数组从0开始依次heapInsert，最后变成大根堆
+    // // O(N*logN)
+    // for(int i = 0; i < arr.length; i++){
+    //     heapInsert(arr,i);
+    // }
+    //或者1.2、从最底层开始，把这一层都变成大根堆，然后再处理上一层，依次变成大根堆
+    // O(N)
+    for(int i = arr.length-1; i >=0 ;i--){
+        heapify(arr,i,arr.length);
     }
     //2、然后把第一个元素也就是最大的元素与最后一个元素交换，同时heapSize有效值减一，逻辑删除最大值，最大值排好序了
+    int heapSize = arr.length;      //heapSize以内的数满足大根堆
     swap(arr,0,heapSize - 1);
     heapSize--;
 
@@ -1152,3 +1158,219 @@ public static void sortedArrDistanceLessK(int[] arr, int k) {
 }
 ```
 
+### 7、class07
+
+#### 1）最大线段重合问题，堆实现
+
+题目：给定很多线段，每个线段都有两个数[start,end]，表示线段开始位置和结束为止，左右都是闭区间。规定：1、线段的开始和结束位置一定都是整数值，2、线段重合区域的长度必须 >= 1。返回线段最多重合区域中，包含了几条线段
+
+由于重合线段的左端点必定是其中某一个线段的左端点。所以求每一个线段 以这个线段左端点开始重合线段的个数，然后返回最大的，即为所求。
+
+```java
+public static int maxCover3(int[][] m) {
+    // m是二维数组，可以认为m内部是一个一个的一维数组
+    // 每一个一维数组就是一个对象，也就是线段
+    // 如下的code，就是根据每一个线段的开始位置排序
+    // 比如, m = { {5,7}, {1,4}, {2,6} } 跑完如下的code之后变成：{ {1,4}, {2,6}, {5,7} }
+
+    //1、首先把所有线段按左端点从小到大排序
+    Arrays.sort(m, (a, b) -> (a[0] - b[0]));
+    //2、创建小根堆，用于存放每一个线段的右端点
+    PriorityQueue<Integer> heap = new PriorityQueue<>();
+    //3、依次检验每个线段的 以这个线段左端点开头的重合线段的个数
+    int max = 0;
+    for (int[] line : m) {
+        //4、若小根堆不为空 并且 小跟堆顶值小于当前线段的左端点，说明之前的这个线段不与当前线段重合，从小根堆中把它弹出。
+        while (!heap.isEmpty() && heap.peek() <= line[0]) {
+            heap.poll();
+        }
+        //5、此时小跟堆中线段都是与当前线段重合的，把当前线段的右端点也放进小根堆中
+        heap.add(line[1]);
+        //6、小根堆中存放线段右端点的数量就是与当前线段重合的线段数
+        //若当前线段的重合线段数比之前的线段重合数大，更新max，否则继续遍历下一个线段
+        max = Math.max(max, heap.size());
+    }
+    return max;
+}
+```
+
+#### 2）手动改写堆题目
+
+题目：给定一个整型数组，int[] arr；和一个布尔类型数组，boolean[] op两个数组一定等长，假设长度为N，arr[i]表示客户编号，op[i]表示客户操作，arr = [3,3,1,1,2,5...]，op=[T,T,T,F,T,F...]。一对arr[i]和op[i]就代表一个事件：用户号为arr[i]，op[i]=T就代表这个用户购买了一件商品，op[i]=F就代表这个用户退货了一件商品。现在你作为电商平台负责人，你想在每一个事件到来的时候，都给购买次数最多的前K名用户颁奖。所以每个事件发生后，你都需要一个得奖名单(得奖区)。
+
+得奖系统的规则：
+
+1.如果某个用户购买商品数为0，但是又发生了退货事件，则认为该事件无效，得奖名单和之前时一致
+
+2.某用户发生购买商品事件，购买商品数+1，发生退货事件，购买商品数-1
+
+3.每次都是最多K个用户得奖，K也为传入的参数，如果根据全部规则，得奖人数确实不够K个，那就以不够的情况输出结果
+
+4.得奖系统分为得奖区和候选区，任何用户只要购买数>0，就一定在这两个区域中的一个
+
+5.购买数量最大的前K名用户进入得奖区，在最初时如果得奖区没有到达K个用户，那么新来的用户直接进入得奖区
+
+6.如果购买数不足以进入得奖区的用户，进入候选区
+
+7.如果候选区购买数最多的用户，已经足以进入得奖区，该用户就会替换得奖区中购买数最少的用户（大于才能替换），如果得奖区中购买数最少的用户有多个，就替换最早进入得奖区的用户；如果候选区中购买数最多的用户有多个，机会会给最早进入候选区的用户。
+
+8.候选区和得奖区是两套时间。因用户只会在其中一个区域，所以只会有一个区域的时间，另一个没有。
+
+从得奖区出来进入候选区的用户，得奖区时间删除，进入候选区的事件就是当前事件的时间(可以理解为arr[i]和op[i]中的i)；
+
+从候选区出来进入得奖区的用户，候选区时间删除，进入得奖区的事件就是当前事件的时间
+
+9.如果某用户购买数等于0，不管在哪个区域都得离开，区域时间删除，离开是指彻底离开，哪个区域也不会找到该用户。如果下次该用户又发生购买行为，产生>0的购买数，会再次根据之前规则回到某个区域中，进入区域的时间重记
+
+```java
+public static class Customer {
+    public int id;              //顾客id
+    public int buy;             //顾客购买件数
+    public int enterTime;       //顾客进入得奖区或者候选区的新时间
+
+    public Customer(int v, int b, int o) {
+        id = v;
+        buy = b;
+        enterTime = 0;
+    }
+}
+
+//将购买件数高的顾客，放在候选区顶部；若购买件数相等，将早来的顾客放前面
+//大根堆实现候选区
+public static class CandidateComparator implements Comparator<Customer> {
+
+    @Override
+    public int compare(Customer o1, Customer o2) {
+        return o1.buy != o2.buy ? (o2.buy - o1.buy) : (o1.enterTime - o2.enterTime);
+    }
+
+}
+
+//将购买件数少的顾客，放在得奖区顶部；若购买件数相等，将早来的顾客放前面
+//小根堆实现得奖区
+public static class DaddyComparator implements Comparator<Customer> {
+
+    @Override
+    public int compare(Customer o1, Customer o2) {
+        return o1.buy != o2.buy ? (o1.buy - o2.buy) : (o1.enterTime - o2.enterTime);
+    }
+
+}
+
+public static class WhosYourDaddy {
+    private HashMap<Integer, Customer> customers;  //顾客表，key -> 顾客id   value ->顾客信息
+    private HeapGreater<Customer> candHeap;        //候选区，加强大根堆实现
+    private HeapGreater<Customer> daddyHeap;       //得奖区，加强小根堆实现
+    private final int daddyLimit;                  //得奖区人数的限制，问题中是K
+
+    public WhosYourDaddy(int limit) {
+        customers = new HashMap<Integer, Customer>();
+        candHeap = new HeapGreater<>(new CandidateComparator());
+        daddyHeap = new HeapGreater<>(new DaddyComparator());
+        daddyLimit = limit;
+    }
+
+    // 当前处理i号事件，arr[i] -> id,  buyOrRefund
+    public void operate(int time, int id, boolean buyOrRefund) {
+        //1、若该顾客退货，并且顾客表都没有该顾客的信息，不进行操作，直接忽略
+        if (!buyOrRefund && !customers.containsKey(id)) {
+            return;
+        }
+        //2、若该顾客购货，并且顾客表没有该顾客的信息，说明该顾客是第一次购买商品，先在顾客表中记录上新顾客id，确保每个顾客都有记录
+        if (!customers.containsKey(id)) {
+            customers.put(id, new Customer(id, 0, 0));
+        }
+        //3、顾客表中获取顾客信息，判断此时事件是购买还是退货
+        Customer c = customers.get(id);
+        if (buyOrRefund) {
+            c.buy++;
+        } else {
+            c.buy--;
+        }
+        //4、若顾客购买数变成0，将顾客表中信息移除。下次来的话在重新记录
+        if (c.buy == 0) {
+            customers.remove(id);
+        }
+        //5、经过事件后，候选区和得奖区都没有该顾客
+        if (!candHeap.contains(c) && !daddyHeap.contains(c)) {
+            //5.1、得奖区目前没满，直接加入得奖区
+            if (daddyHeap.size() < daddyLimit) {
+                c.enterTime = time;
+                daddyHeap.push(c);
+            } else {
+                //5.2、得奖区满了，直接进入候选区
+                c.enterTime = time;
+                candHeap.push(c);
+            }
+        } else if (candHeap.contains(c)) {
+            //6、之前候选区有该顾客，若购买数变成0，从候选区删除；否则对候选区进行调整，使它仍满足大根堆
+            if (c.buy == 0) {
+                candHeap.remove(c);
+            } else {
+                candHeap.resign(c);
+            }
+        } else {
+            //7、之前得奖区有该顾客，若购买数变成0，从得奖区删除；否则对得奖区进行调整，使它仍满足小根堆
+            if (c.buy == 0) {
+                daddyHeap.remove(c);
+            } else {
+                daddyHeap.resign(c);
+            }
+        }
+        //8、更新得奖区最新情况
+        daddyMove(time);
+    }
+
+    //获取得奖区的顾客id集合
+    public List<Integer> getDaddies() {
+        List<Customer> customers = daddyHeap.getAllElements();
+        List<Integer> ans = new ArrayList<>();
+        for (Customer c : customers) {
+            ans.add(c.id);
+        }
+        return ans;
+    }
+
+    //更新得奖区最新情况
+    private void daddyMove(int time) {
+        //1、候选区为空，不用更新得奖区
+        if (candHeap.isEmpty()) {
+            return;
+        }
+        //2、得奖区不满，将候选区的第一个放进来，也就是大根堆第一个放进来，并赋予最新事件的时间
+        if (daddyHeap.size() < daddyLimit) {
+            Customer p = candHeap.pop();
+            p.enterTime = time;
+            daddyHeap.push(p);
+        } else {
+            //3、得奖区满了，并且候选区不为空
+            //4、检验候选区第一个是否满足替换得奖区第一个的条件
+            if (candHeap.peek().buy > daddyHeap.peek().buy) {
+                Customer oldDaddy = daddyHeap.pop();
+                Customer newDaddy = candHeap.pop();
+                oldDaddy.enterTime = time;
+                newDaddy.enterTime = time;
+                daddyHeap.push(newDaddy);
+                candHeap.push(oldDaddy);
+            }
+        }
+    }
+
+}
+
+//主函数，返回每次事件的得奖区的信息
+public static List<List<Integer>> topK(int[] arr, boolean[] op, int k) {
+    List<List<Integer>> ans = new ArrayList<>();
+    WhosYourDaddy whoDaddies = new WhosYourDaddy(k);
+    for (int i = 0; i < arr.length; i++) {
+        //for循环遍历 每次事件的得奖区的信息
+        whoDaddies.operate(i, arr[i], op[i]);
+        ans.add(whoDaddies.getDaddies());
+    }
+    return ans;
+}
+```
+
+### 8、class08
+
+#### 1）
