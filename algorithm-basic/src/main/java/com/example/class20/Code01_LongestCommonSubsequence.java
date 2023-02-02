@@ -1,7 +1,7 @@
-package com.example.class19;
+package com.example.class20;
 
 /**
- * @Date: 2023/1/30 12:17、
+ * @Date: 2023/1/30 12:17
  * 最长公共子序列
  *
  * 题目：给定两个字符串 text1 和 text2，返回这两个字符串的最长 公共子序列 的长度。如果不存在 公共子序列 ，返回 0 。
@@ -10,7 +10,7 @@ package com.example.class19;
  *
  * 测试链接：https://leetcode.cn/problems/longest-common-subsequence/
  */
-public class Code04_LongestCommonSubsequence {
+public class Code01_LongestCommonSubsequence {
 
     //1、暴力递归
     public static int longestCommonSubsequence1(String s1, String s2) {
