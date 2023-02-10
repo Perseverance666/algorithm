@@ -3,6 +3,8 @@ package com.example.class27;
 /**
  * @Date: 2023/2/9 14:06
  * KMP算法实现
+ *
+ * 题目：给定两个字符串s1，s2，如果字符串s1中含有子串s2，则返回s2在s1中的开始位置，不含有返回-1
  */
 public class Code01_KMP {
     public static int getIndexOf(String s1, String s2) {
