@@ -1,4 +1,4 @@
-package com.example.class35;
+package com.example.class36;
 
 /**
  * @Date: 2023/2/16 13:53
@@ -10,7 +10,7 @@ package com.example.class35;
  * 如果你当前的能力，大于等于i号怪兽的能力，你可以选择直接通过，你的能力并不会下降，你也可以选择贿赂这个怪兽，然后怪兽就会加入你，他的能力直接累加到你的能力上
  * 返回通过所有的怪兽，需要花的最小钱数
  */
-public class Code04_MoneyProblem {
+public class Code01_MoneyProblem {
 
     // int[] d d[i]：i号怪兽的武力
     // int[] p p[i]：i号怪兽要求的钱
