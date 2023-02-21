@@ -15,7 +15,9 @@ public class Code08_PrintStar {
             }
         }
         while (leftUp <= rightDown) {
+            //每次打印两圈，从外到内
             set(m, leftUp, rightDown);
+            //进行调整准备打印下一组两圈
             leftUp += 2;
             rightDown -= 2;
         }
@@ -26,7 +28,7 @@ public class Code08_PrintStar {
             System.out.println();
         }
     }
-
+    //每次打印两圈
     public static void set(char[][] m, int leftUp, int rightDown) {
         for (int col = leftUp; col <= rightDown; col++) {
             m[leftUp][col] = '*';
@@ -43,6 +45,6 @@ public class Code08_PrintStar {
     }
 
     public static void main(String[] args) {
-        printStar(5);
+        printStar(6);
     }
 }
