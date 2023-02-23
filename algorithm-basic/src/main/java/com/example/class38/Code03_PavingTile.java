@@ -121,9 +121,10 @@ public class Code03_PavingTile {
         if (N == 1 || M == 1) {
             return 1;
         }
-        int max = Math.max(N, M);
-        int min = Math.min(N, M);
-        int pre = (1 << min) - 1;
+        int max = Math.max(N, M);   //max作为行数
+        int min = Math.min(N, M);   //min作为列数
+        int pre = (1 << min) - 1;   //pre用二进制形式表示上一行的状态，有min位
+        //dp[i][j]代表上一层的状态为i，当前讨论该层的j行
         int[][] dp = new int[1 << min][max + 1];
         for (int i = 0; i < dp.length; i++) {
             for (int j = 0; j < dp[0].length; j++) {
@@ -132,30 +133,39 @@ public class Code03_PavingTile {
         }
         return process3(pre, 0, max, min, dp);
     }
-
+    //pre是上一行的状态，i是当前行，N是总共有多少行，M是总共有多少列，dp是缓存
     public static int process3(int pre, int i, int N, int M, int[][] dp) {
         if (dp[pre][i] != -1) {
+            //缓存里有直接拿
             return dp[pre][i];
         }
         int ans = 0;
         if (i == N) {
+            //所有层都讨论完了，若上层满了，铺法+1，若上层不满，铺法+0
             ans = pre == ((1 << M) - 1) ? 1 : 0;
         } else {
+            //讨论第i层，op二进制为0的位置表示 需要去深度优先遍历去讨论怎么放砖。为1的位置就代表不用讨论了，必须竖着放
             int op = ((~pre) & ((1 << M) - 1));
+            //从最后一列往第0列开始讨论
             ans = dfs3(op, M - 1, i, N, M, dp);
         }
         dp[pre][i] = ans;
         return ans;
-    }
 
+    }
+    //op能表示哪些列可能考虑摆砖，col是当前列，level是当前行
     public static int dfs3(int op, int col, int level, int N, int M, int[][] dp) {
         if (col == -1) {
+            //这一行的所有列讨论完了，准备讨论下一行
             return process3(op, level + 1, N, M, dp);
         }
         int ans = 0;
+        //1、砖竖着放
         ans += dfs3(op, col - 1, level, N, M, dp);
-        if (col > 0 && (op & (3 << (col - 1))) == 0) {
+        if (col > 0 && (op & (3 << (col - 1))) == 0) { //3的二进制11左移col-1位
+            //2、砖能横着放
             ans += dfs3((op | (3 << (col - 1))), col - 2, level, N, M, dp);
+            //注：由于是值传递，op最终不会改变，不用恢复现场
         }
         return ans;
     }
