@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/algorithm.iml" filepath="$PROJECT_DIR$/.idea/algorithm.iml" />
       <module fileurl="file://$PROJECT_DIR$/algorithm-basic/algorithm-basic.iml" filepath="$PROJECT_DIR$/algorithm-basic/algorithm-basic.iml" />
+      <module fileurl="file://$PROJECT_DIR$/algorithm-offer/algorithm-offer.iml" filepath="$PROJECT_DIR$/algorithm-offer/algorithm-offer.iml" />
       <module fileurl="file://$PROJECT_DIR$/algorithm-practice/algorithm-practice.iml" filepath="$PROJECT_DIR$/algorithm-practice/algorithm-practice.iml" />
       <module fileurl="file://$PROJECT_DIR$/algorithm-primary/algorithm-primary.iml" filepath="$PROJECT_DIR$/algorithm-primary/algorithm-primary.iml" />
     </modules>
