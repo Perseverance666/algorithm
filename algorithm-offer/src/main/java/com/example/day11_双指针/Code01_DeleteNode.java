@@ -15,6 +15,21 @@ public class Code01_DeleteNode {
     }
 
     public ListNode deleteNode(ListNode head, int val) {
-        return null;
+        if(head.val == val){
+            //如果链表第一个就和val相等
+            return head.next;
+        }
+        ListNode pre = head;
+        ListNode cur = head.next;
+        while(cur != null){
+            if(cur.val == val){
+                pre.next = cur.next;
+                break;
+            }else {
+                pre = cur;
+                cur = cur.next;
+            }
+        }
+        return head;
     }
 }

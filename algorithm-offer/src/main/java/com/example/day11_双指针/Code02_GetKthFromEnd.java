@@ -13,7 +13,32 @@ public class Code02_GetKthFromEnd {
             val = x;
         }
     }
+
+    //双指针
     public ListNode getKthFromEnd(ListNode head, int k) {
-        return null;
+        ListNode former = head;
+        ListNode latter = head;
+        for (int i = 0; i < k; i++) {
+            former = former.next;
+        }
+        while (former != null) {
+            former = former.next;
+            latter = latter.next;
+        }
+        return latter;
     }
+
+//    public ListNode getKthFromEnd(ListNode head, int k) {
+//        ListNode cur = head;
+//        int count = 0;
+//        while (cur != null){
+//            count++;
+//            cur = cur.next;
+//        }
+//        cur = head;
+//        for(int i = 1; i <= count - k; i++){
+//            cur = cur.next;
+//        }
+//        return cur;
+//    }
 }
