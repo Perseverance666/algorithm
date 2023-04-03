@@ -32,7 +32,7 @@ public class Code02_LengthOfLongestSubstring {
                 //1、preI ~ i 之间没有出现重复的字母
                 int p1 = i - preI;
                 //2、preI ~ i 之间出现了重复的字母
-                int p2 = dp[i] = dp[i - 1] + 1;
+                int p2 = dp[i - 1] + 1;
                 dp[i] = Math.min(p1, p2);
             }
             map[str[i]] = i;
