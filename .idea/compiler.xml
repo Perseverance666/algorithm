@@ -8,6 +8,7 @@
         <outputRelativeToContentRoot value="true" />
         <module name="algorithm-basic" />
         <module name="algorithm-practice" />
+        <module name="algorithm-hot100" />
         <module name="algorithm-offer" />
         <module name="algorithm-primary" />
       </profile>
@@ -15,6 +16,7 @@
     <bytecodeTargetLevel>
       <module name="algorithm" target="8" />
       <module name="algorithm-basic" target="8" />
+      <module name="algorithm-hot100" target="8" />
       <module name="algorithm-offer" target="8" />
       <module name="algorithm-practice" target="8" />
       <module name="algorithm-primary" target="8" />
