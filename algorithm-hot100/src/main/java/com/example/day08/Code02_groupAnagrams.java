@@ -21,14 +21,11 @@ public class Code02_groupAnagrams {
             Arrays.sort(str);  //排序
             String key = new String(str);
             List<String> list = new ArrayList<>();
-            if (!map.containsKey(key)) {
-                list.add(strs[i]);
-                map.put(key, list);
-            } else {
+            if (map.containsKey(key)) {
                 list = map.get(key);
-                list.add(strs[i]);
-                map.put(key, list);
             }
+            list.add(strs[i]);
+            map.put(key, list);
         }
 
         for (Map.Entry<String, List<String>> entries : map.entrySet()) {
