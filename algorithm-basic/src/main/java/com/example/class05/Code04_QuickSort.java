@@ -15,6 +15,7 @@ public class Code04_QuickSort {
         if(L >= R){
             return;
         }
+        swap(arr, L + (int) (Math.random() * (R - L + 1)), R);
         int p = partition1(arr, L, R);
         process1(arr,L,p-1);
         process1(arr,p+1,R);
@@ -34,35 +35,38 @@ public class Code04_QuickSort {
     }
 
     //2、双边循环快排
-    public static void quickSort2(int[] arr){
-        process2(arr,0,arr.length-1);
+    public static void quickSort2(int[] arr) {
+        process2(arr, 0, arr.length - 1);
     }
-    public static void process2(int[] arr,int L,int R){
-        if(L >= R){
+
+    public static void process2(int[] arr, int L, int R) {
+        if (L >= R) {
             return;
         }
+        swap(arr, L + (int) (Math.random() * (R - L + 1)), R);
         int p = partition2(arr, L, R);
-        process2(arr,L,p-1);
-        process2(arr,p+1,R);
+        process2(arr, L, p - 1);
+        process2(arr, p + 1, R);
     }
+
     //双边循环快排，选最左边元素为基准点pivot
-    public static int partition2(int[] arr,int L,int R){
+    public static int partition2(int[] arr, int L, int R) {
         int pivot = arr[L];
-        int i = L ;
+        int i = L;
         int j = R;
-        while(i < j){
+        while (i < j) {
             //先让j从右往左找 <= pivot的
-            while(i < j && arr[j] > pivot){     //注意:i<j，避免交换错误
+            while (i < j && arr[j] > pivot) {     //注意:i<j，避免交换错误
                 j--;
             }
             //再让i从左往右找 > pivot的
-            while (i < j && arr[i] <= pivot){
+            while (i < j && arr[i] <= pivot) {
                 i++;
             }
-            swap(arr,i,j);
+            swap(arr, i, j);
         }
         //此时i == j
-        swap(arr,L,i);
+        swap(arr, L, i);
         return i;
     }
 

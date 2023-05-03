@@ -17,4 +17,22 @@ public class Code03_MaxProfit {
         }
         return profit;
     }
+    //自己写的
+    public int maxProfit2(int[] prices) {
+        int res = 0;
+        int len = prices.length;
+        if(prices == null || len <= 1){
+            return res;
+        }
+        //dp[i]表示价格为prices[i]卖出时能获得的最大利润，dp[0]不用
+        int[] dp = new int[len];
+        //用于记录i前面的最小买入价格
+        int min = prices[0];
+        for(int i = 1; i < len; i++){
+            dp[i] = prices[i] - min;
+            res = Math.max(res,dp[i]);
+            min = Math.min(min,prices[i]);
+        }
+        return res;
+    }
 }

@@ -10,6 +10,7 @@
         <module name="algorithm-practice" />
         <module name="algorithm-hot100" />
         <module name="algorithm-offer" />
+        <module name="algorithm-writtenExam" />
         <module name="algorithm-primary" />
       </profile>
     </annotationProcessing>
@@ -20,6 +21,7 @@
       <module name="algorithm-offer" target="8" />
       <module name="algorithm-practice" target="8" />
       <module name="algorithm-primary" target="8" />
+      <module name="algorithm-writtenExam" target="8" />
     </bytecodeTargetLevel>
   </component>
 </project>

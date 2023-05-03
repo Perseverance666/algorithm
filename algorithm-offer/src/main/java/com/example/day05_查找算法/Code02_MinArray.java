@@ -19,7 +19,7 @@ public class Code02_MinArray {
                 //小于往左找
                 R = mid;
             }else {
-                //numbers[mid] = numbers[mid + 1]，往左找
+                //array[mid] == array[R]，往左找
                 R--;
             }
         }

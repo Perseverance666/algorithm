@@ -29,4 +29,32 @@ public class Code03_ReverseWords {
         //最后删除尾空格
         return res.toString().trim();
     }
+
+    //自己写的
+    public String reverseWords2(String str) {
+        if (str == null || str.length() == 0) {
+            return str;
+        }
+        //删除首尾空格
+        str = str.trim();
+        char[] s = str.toCharArray();
+        int L = s.length - 1;
+        int R = L;
+        StringBuilder res = new StringBuilder();
+        while (L >= 0) {
+            if (s[L] != ' ') {
+                L--;
+            } else {
+                res.append(str.substring(L + 1, R + 1) + " ");
+                while(s[L] == ' '){
+                    //找到下一个单词的尾部
+                    L--;
+                }
+                R = L;
+            }
+        }
+        //将最后一个单词加到res后
+        res.append(str.substring(L + 1, R + 1));
+        return res.toString();
+    }
 }
