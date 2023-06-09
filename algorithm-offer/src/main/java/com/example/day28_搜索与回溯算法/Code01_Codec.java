@@ -55,12 +55,12 @@ public class Code01_Codec {
         int index = 1;
         while(!queue.isEmpty()){
             TreeNode node = queue.poll();
-            if(vals[index].equals("null")){
+            if(!vals[index].equals("null")){
                 node.left = new TreeNode(Integer.parseInt(vals[index]));
                 queue.add(node.left);
             }
             index++;
-            if(vals[index].equals("null")){
+            if(!vals[index].equals("null")){
                 node.right = new TreeNode(Integer.parseInt(vals[index]));
                 queue.add(node.right);
             }

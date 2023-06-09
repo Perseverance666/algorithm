@@ -41,16 +41,16 @@ public class Code03_detectCycle {
             return null;
         }
         ListNode slow = head;
-        ListNode fast = head.next;
-        while(slow != fast){
+        ListNode fast = head;
+        while(true){
             if(fast == null || fast.next == null){
                 return null;
             }
             slow = slow.next;
             fast = fast.next.next;
+            if(slow == fast) break;
         }
         //此时slow == fast
-        slow = slow.next;
         ListNode ptr = head;
         while (ptr != slow) {
             ptr = ptr.next;
