@@ -16,6 +16,7 @@
         <module>algorithm-offer</module>
         <module>algorithm-hot100</module>
         <module>algorithm-writtenExam</module>
+        <module>algorithm-dmsxl</module>
     </modules>
 
     <properties>
